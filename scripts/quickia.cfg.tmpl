@@ -1,0 +1,104 @@
+// Base QuickIA configuration parameters
+
+sys = {
+    cores = {
+        beefy = {
+            type = "OOO"; //Xeon
+            cores = 2;
+            dcache = "l1d_beefy";
+            icache = "l1i_beefy";
+        };
+        wimpy = {
+            type = "Timing"; //Atom
+            cores = 2;
+            dcache = "l1d_wimpy";
+            icache = "l1i_wimpy";
+        };
+    };
+
+    lineSize = 64;
+    frequency = 1600;
+
+    caches = {
+        l1i_beefy = {
+            caches = 2;
+            size = 32768; //Xeon
+            latency = 4;
+            array = {
+                type = "SetAssoc";
+                ways = 8; //Xeon
+            };
+        };
+        l1d_beefy = {
+            caches = 2;
+            size = 32768;
+            latency = 4;
+            array = {
+                type = "SetAssoc";
+                ways = 8;
+            };
+        };
+        l2_beefy = {
+            caches = 2;
+            size = 1048576; //Xeon
+            latency = 10;
+            array = {
+                type = "SetAssoc";
+                ways = 8;
+            };
+            children = "l1i_beefy|l1d_beefy";  // interleave
+        };
+        l1i_wimpy = {
+            caches = 2;
+            size = 24576; //Atom
+            latency = 4;
+            array = {
+                type = "SetAssoc";
+                ways = 6; 
+            };
+        };
+        l1d_wimpy = {
+            caches = 2;
+            size = 32768;
+            latency = 4;
+            array = {
+                type = "SetAssoc";
+                ways = 8;
+            };
+        };
+        l2_wimpy = {
+            caches = 2;
+            size = 524288; //Atom
+            latency = 10;
+            array = {
+                type = "SetAssoc";
+                ways = 8;
+            };
+            children = "l1i_wimpy|l1d_wimpy";  // interleave
+        };
+        llc = {
+            caches = 1;
+            banks = 6;
+            size = 12582912;
+            latency = 27;
+
+            array = {
+                type = "SetAssoc";
+                hash = "H3";
+                ways = 16;
+            };
+            children = "l2_beefy l2_wimpy";
+        };
+    };
+    
+    mem = {
+        type = "DDR";
+        controllers = 4;
+        controllerLatency = 90;
+    };
+};
+
+sim = {
+    phaseLength = 10000;
+};
+
