@@ -24,15 +24,15 @@ g_task_db = ({
     'x264-md':'$PARSEC_APPS_PATH/x264/inst/amd64-linux.gcc/bin/x264 --threads 4 --bitrate 2048 -o /tmp/x264-md.out $PARSEC_APPS_PATH/x264/inputs/eledream_640x360_32.y4m',
     'x264-lg':'$PARSEC_APPS_PATH/x264/inst/amd64-linux.gcc/bin/x264 --threads 4 --bitrate 2048 -o /tmp/x264-lg.out $PARSEC_APPS_PATH/x264/inputs/eledream_640x360_128.y4m',
     'raytrace':'$PARSEC_APPS_PATH/raytrace/inst/amd64-linux.gcc/bin/rtview $PARSEC_APPS_PATH/raytrace/inputs/happy_buddha.obj',
-	'vips-sm' : "$PARSEC_APPS_PATH/vips/inst/amd64-linux.gcc/bin/vips --vips-concurrency=4 im_benchmark $PARSEC_APPS_PATH/vips/inputs/pomegranate_1600x1200.v output.v",
-    'vips-md' : "$PARSEC_APPS_PATH/vips/inst/amd64-linux.gcc/bin/vips --vips-concurrency=4 im_benchmark $PARSEC_APPS_PATH/vips/inputs/vulture_2336x2336.v output.v",
-    'vips-lg' : "$PARSEC_APPS_PATH/vips/inst/amd64-linux.gcc/bin/vips --vips-concurrency=4 im_benchmark $PARSEC_APPS_PATH/vips/inputs/bigben_2662x5500.v output.v",
-    'bodytrack-sm' : "$PARSEC_APPS_PATH/bodytrack/inst/amd64-linux.gcc/bin/bodytrack $PARSEC_APPS_PATH/bodytrack/inputs/sequenceB_1 1 1 1 1 0 4 1",
-	'bodytrack-md' : "$PARSEC_APPS_PATH/bodytrack/inst/amd64-linux.gcc/bin/bodytrack $PARSEC_APPS_PATH/bodytrack/inputs/sequenceB_2 1 1 1 1 0 4 1",  
-	'bodytrack-lg' : "$PARSEC_APPS_PATH/bodytrack/inst/amd64-linux.gcc/bin/bodytrack $PARSEC_APPS_PATH/bodytrack/inputs/sequenceB_4 1 1 1 1 0 4 1",
-	'freqmine-sm' : "/home/student/parsec-3.0/pkgs/apps/freqmine/inst/amd64-linux.gcc/bin/freqmine /home/student/parsec-3.0/pkgs/apps/freqmine/inputs/kosarak_250k.dat 220",
-	'freqmine-md' : "/home/student/parsec-3.0/pkgs/apps/freqmine/inst/amd64-linux.gcc/bin/freqmine /home/student/parsec-3.0/pkgs/apps/freqmine/inputs/kosarak_500k.dat 220",
-	'freqmine-lg' : "/home/student/parsec-3.0/pkgs/apps/freqmine/inst/amd64-linux.gcc/bin/freqmine /home/student/parsec-3.0/pkgs/apps/freqmine/inputs/kosarak_990k.dat 220",
+	'vips-sm':'$PARSEC_APPS_PATH/vips/inst/amd64-linux.gcc/bin/vips --vips-concurrency=4 im_benchmark $PARSEC_APPS_PATH/vips/inputs/pomegranate_1600x1200.v output.v',
+    'vips-md':'$PARSEC_APPS_PATH/vips/inst/amd64-linux.gcc/bin/vips --vips-concurrency=4 im_benchmark $PARSEC_APPS_PATH/vips/inputs/vulture_2336x2336.v output.v',
+    'vips-lg':'$PARSEC_APPS_PATH/vips/inst/amd64-linux.gcc/bin/vips --vips-concurrency=4 im_benchmark $PARSEC_APPS_PATH/vips/inputs/bigben_2662x5500.v output.v',
+    'bodytrack-sm':'$PARSEC_APPS_PATH/bodytrack/inst/amd64-linux.gcc/bin/bodytrack $PARSEC_APPS_PATH/bodytrack/inputs/sequenceB_1 1 1 1 1 0 4 1',
+	'bodytrack-md':'$PARSEC_APPS_PATH/bodytrack/inst/amd64-linux.gcc/bin/bodytrack $PARSEC_APPS_PATH/bodytrack/inputs/sequenceB_2 1 1 1 1 0 4 1',  
+	'bodytrack-lg':'$PARSEC_APPS_PATH/bodytrack/inst/amd64-linux.gcc/bin/bodytrack $PARSEC_APPS_PATH/bodytrack/inputs/sequenceB_4 1 1 1 1 0 4 1',
+	'freqmine-sm':'$PARSEC_APPS_PATH/freqmine/inst/amd64-linux.gcc/bin/freqmine /home/student/parsec-3.0/pkgs/apps/freqmine/inputs/kosarak_250k.dat 220',
+	'freqmine-md':'$PARSEC_APPS_PATH/freqmine/inst/amd64-linux.gcc/bin/freqmine /home/student/parsec-3.0/pkgs/apps/freqmine/inputs/kosarak_500k.dat 220',
+	'freqmine-lg':'$PARSEC_APPS_PATH/freqmine/inst/amd64-linux.gcc/bin/freqmine /home/student/parsec-3.0/pkgs/apps/freqmine/inputs/kosarak_990k.dat 220',
 });
 
 #-----------------------------------------------------
@@ -186,6 +186,31 @@ def parse_zsim_out(zout_path):
     return zout_dict
 
 #-----------------------------------------------------
+# Write CSV log file
+def write_log(log_path, scheduler, hp_tasks, lp_tasks):
+    header = (['scheduler','hp_tasks','lp_tasks'] +
+              map(lambda x:x[0] if isinstance(x,tuple) else x, g_props_to_log))
+    zout_db = parse_zsim_out('zsim.out')
+    log_hdl = None
+    if os.path.isfile(log_path):
+        log_hdl = open(log_path, 'a')
+    else:
+        log_hdl = open(log_path, 'w')
+        log_hdl.write(','.join(header) + '\n')
+    logline = scheduler
+    logline += ',' + (hp_tasks if hp_tasks is not None else '<None>')
+    logline += ',' + (lp_tasks if lp_tasks is not None else '<None>')
+    for prop in g_props_to_log:
+        if isinstance(prop, tuple):
+            value = reduce(prop[1], map(lambda x:zout_db[x], prop[2]))
+        else:
+            value = zout_db[prop]
+        logline += ',' + str(value)
+    log_hdl.write(logline + '\n')
+    log_hdl.close()
+
+
+#-----------------------------------------------------
 # Main
 
 def main():
@@ -221,27 +246,8 @@ def main():
         os.system('../build/opt/zsim ' + args.out_cfg)
         # Parse zsim output file
         if (args.log is not None):
-            header = (['scheduler','hp_tasks','lp_tasks'] +
-                      map(lambda x:x[0] if isinstance(x,tuple) else x, g_props_to_log))
-            zout_db = parse_zsim_out('zsim.out')
-            log_hdl = None            
-            if os.path.isfile(args.log):
-                log_hdl = open(args.log, 'a')
-            else:
-                log_hdl = open(args.log, 'w')
-                log_hdl.write(','.join(header) + '\n')
-            logline = args.scheduler 
-            logline += ',' + (args.hp_tasks if args.hp_tasks is not None else '<None>')
-            logline += ',' + (args.lp_tasks if args.lp_tasks is not None else '<None>')
-            for prop in g_props_to_log:
-                if isinstance(prop, tuple):
-                    value = reduce(prop[1], map(lambda x:zout_db[x], prop[2]))
-                else:
-                    value = zout_db[prop]
-                logline += ',' + str(value)
-            log_hdl.write(logline + '\n')
-            log_hdl.close()
-            
+            write_log(args.log, args.scheduler, args.hp_tasks, args.lp_tasks)
+
 
 if __name__ == '__main__':
     main()
