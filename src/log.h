@@ -149,6 +149,16 @@ class PrintExpr {
     log_unlock(); \
 }
 
+#define dbg(args...) \
+{ \
+    log_lock(); \
+    fprintf(logFdErr, "%sDEBUG: ", logHeader); \
+    fprintf(logFdErr, args); \
+    fprintf(logFdErr, "\n"); \
+    fflush(logFdErr); \
+    log_unlock(); \
+}
+
 /* I would call these macros log, but there's this useless math function
  * that happens to conflict with this...
  */
