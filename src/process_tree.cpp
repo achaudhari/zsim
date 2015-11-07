@@ -34,6 +34,7 @@
 #include "process_stats.h"
 #include "stats.h"
 #include "zsim.h"
+#include "task2core.h"
 
 using std::string;
 using std::stringstream;
@@ -181,9 +182,28 @@ static void PopulateLevel(Config& config, const std::string& prefix, std::vector
         uint64_t dumpInstrs = config.get<uint64_t>(p_ss.str() +  ".dumpInstrs", 0);
         uint32_t restarts = config.get<uint32_t>(p_ss.str() +  ".restarts", 0);
         g_string syscallBlacklistRegex = config.get<const char*>(p_ss.str() +  ".syscallBlacklistRegex", ".*");
+
         g_vector<bool> mask;
         if (!zinfo->traceDriven) {
-            mask = ParseMask(config.get<const char*>(p_ss.str() +  ".mask", DefaultMaskStr().c_str()), zinfo->numCores);
+            mask = ParseMask(config.get<const char*>(p_ss.str() + ".mask", DefaultMaskStr().c_str()), zinfo->numCores);
+            if (config.exists(p_ss.str()+".mask")) {
+                dbg("process%d: Using manually specified affinity.", idx);
+            } else if (config.exists(p_ss.str()+".parallelism") ||
+                       config.exists(p_ss.str()+".workload") ||
+                       config.exists(p_ss.str()+".sharing")) {
+                uint32_t parallelism = config.get<uint32_t>(p_ss.str() +  ".parallelism", zinfo->numCores);
+                uint32_t workload = config.get<uint32_t>(p_ss.str() +  ".workload", 1);
+                uint32_t sharing = config.get<uint32_t>(p_ss.str() +  ".sharing", 1);
+                mask = Task2CoreScheduler::computeAffinity(zinfo->numCores, parallelism, workload, sharing);
+                dbg("process%d: Using computed affinity using (parallelism=%d,workload=%d,sharing=%d)", idx, parallelism, workload, sharing);
+            } else {
+                dbg("process%d: Using default affinity.", idx);
+            }
+            string maskStr;
+            for (size_t i = 0; i < zinfo->numCores; i++) {
+                maskStr = (mask[i]?"1":"0") + maskStr;
+            }
+            dbg("process%d: Mask = 0b%s", idx, maskStr.c_str());
         }  //  else leave mask empty, no cores
         g_vector<uint64_t> ffiPoints(ParseList<uint64_t>(config.get<const char*>(p_ss.str() +  ".ffiPoints", "")));
 

@@ -5,6 +5,13 @@ import collections
 import argparse
 from itertools import takewhile
 
+# An unscheduled task
+unsched_task_t = collections.namedtuple('unsched_task_t', 'name priority')
+# A scheduled task
+sched_task_t = collections.namedtuple('sched_task_t', 'cmd auto_mask cores props')
+# Process properties
+proc_props_t = collections.namedtuple('proc_props_t', 'parallelism workload sharing')
+
 #-----------------------------------------------------
 # Task ID to command mapping code
 g_task_db = ({
@@ -33,6 +40,36 @@ g_task_db = ({
 	'freqmine-sm':'$PARSEC_APPS_PATH/freqmine/inst/amd64-linux.gcc/bin/freqmine /home/student/parsec-3.0/pkgs/apps/freqmine/inputs/kosarak_250k.dat 220',
 	'freqmine-md':'$PARSEC_APPS_PATH/freqmine/inst/amd64-linux.gcc/bin/freqmine /home/student/parsec-3.0/pkgs/apps/freqmine/inputs/kosarak_500k.dat 220',
 	'freqmine-lg':'$PARSEC_APPS_PATH/freqmine/inst/amd64-linux.gcc/bin/freqmine /home/student/parsec-3.0/pkgs/apps/freqmine/inputs/kosarak_990k.dat 220',
+});
+
+#-----------------------------------------------------
+# Task ID to command mapping code
+g_props_db = ({
+    'blackscholes-sm':  proc_props_t(parallelism=0,workload=0,sharing=0),
+    'blackscholes-md':  proc_props_t(parallelism=0,workload=0,sharing=0),
+    'blackscholes-lg':  proc_props_t(parallelism=0,workload=0,sharing=0),
+    'fluidanimate-sm':  proc_props_t(parallelism=0,workload=0,sharing=0),
+    'fluidanimate-md':  proc_props_t(parallelism=0,workload=0,sharing=0),
+    'fluidanimate-lg':  proc_props_t(parallelism=0,workload=0,sharing=0),
+    'facesim-sm':       proc_props_t(parallelism=0,workload=0,sharing=0),
+    'facesim-md':       proc_props_t(parallelism=0,workload=0,sharing=0),
+    'facesim-lg':       proc_props_t(parallelism=0,workload=0,sharing=0),
+    'swaptions-sm':     proc_props_t(parallelism=0,workload=0,sharing=0),
+    'swaptions-md':     proc_props_t(parallelism=0,workload=0,sharing=0),
+    'swaptions-lg':     proc_props_t(parallelism=0,workload=0,sharing=0),
+    'x264-sm':          proc_props_t(parallelism=0,workload=0,sharing=0),
+    'x264-md':          proc_props_t(parallelism=0,workload=0,sharing=0),
+    'x264-lg':          proc_props_t(parallelism=0,workload=0,sharing=0),
+    'raytrace':         proc_props_t(parallelism=0,workload=0,sharing=0),
+    'vips-sm':          proc_props_t(parallelism=0,workload=0,sharing=0),
+    'vips-md':          proc_props_t(parallelism=0,workload=0,sharing=0),
+    'vips-lg':          proc_props_t(parallelism=0,workload=0,sharing=0),
+    'bodytrack-sm':     proc_props_t(parallelism=0,workload=0,sharing=0),
+    'bodytrack-md':     proc_props_t(parallelism=0,workload=0,sharing=0),
+    'bodytrack-lg':     proc_props_t(parallelism=0,workload=0,sharing=0),
+    'freqmine-sm':      proc_props_t(parallelism=0,workload=0,sharing=0),
+    'freqmine-md':      proc_props_t(parallelism=0,workload=0,sharing=0),
+    'freqmine-lg':      proc_props_t(parallelism=0,workload=0,sharing=0),
 });
 
 #-----------------------------------------------------
@@ -81,7 +118,7 @@ g_props_to_log = ([
 
 #-----------------------------------------------------
 # Command line option parser
-g_schedulers = ['1b','1s','bb','ss','bs','bss','fair'];
+g_schedulers = ['auto','1b','1s','bb','ss','bs','bss','fair'];
 
 #-----------------------------------------------------
 # Core mapping
@@ -103,11 +140,6 @@ def get_options():
 def print_usage_help():
     print 'TODO'
 
-# An unscheduled task
-unsched_task_t = collections.namedtuple('unsched_task_t', 'name priority')
-# A scheduled task
-sched_task_t = collections.namedtuple('sched_task_t', 'cmd cores')
-
 #-----------------------------------------------------
 # Generate a zsim configuration file
 # tmpl_path: Path to a zsim cfg file template (cfg file without process info)
@@ -120,24 +152,34 @@ def generate_zsim_cfg(tmpl_path, cfg_path, tasks):
     taskid = 0
     for task in tasks:
         task_name = 'process' + str(taskid)
-        task_entry = (task_name + ' = {\n' +
-                      '    command = "' + task.cmd + '";\n' +
-                      '    mask = "' + ' '.join(g_core_map[c] for c in task.cores) + '";\n' +
-                      '};\n')
+        if task.auto_mask == 1:
+            task_entry = (task_name + ' = {\n' +
+                          '    command = "' + task.cmd + '";\n' +
+                          '    mask = "' + ' '.join(g_core_map[c] for c in task.cores) + '";\n' +
+                          '};\n')
+        else:
+            task_entry = (task_name + ' = {\n' +
+                          '    command = "' + task.cmd + '";\n' +
+                          '    parallelism = ' + str(task.props.parallelism) + ';\n' +
+                          '    workload = ' + str(task.props.workload) + ';\n' +
+                          '    sharing = ' + str(task.props.sharing) + ';\n' +
+                          '};\n')
         cfg_file.write(task_entry)
         taskid = taskid + 1
     cfg_file.close()
 
 #-----------------------------------------------------
 # Generate a task to core mapping based on given schedule
+# Not for the "auto" scheduler
 
-def gen_task_to_core_schedule(unsched_tasks, scheduler):
+def gen_manual_task_to_core_schedule(unsched_tasks, scheduler):
     hp_core_db = ({
         '1b'   : ['beefy-0'],
         '1s'   : ['wimpy-0'],
         'bb'   : ['beefy-0','beefy-1'],
         'ss'   : ['wimpy-0','wimpy-1'],
         'bs'   : ['beefy-0','wimpy-0'],
+        'bbs'  : ['beefy-0','beefy-1','wimpy-0'],
         'bss'  : ['beefy-0','wimpy-0','wimpy-1'],
         'fair' : ['beefy-0','beefy-1','wimpy-0','wimpy-1']
     });
@@ -147,13 +189,10 @@ def gen_task_to_core_schedule(unsched_tasks, scheduler):
         'bb'   : ['wimpy-0','wimpy-1'],
         'ss'   : ['beefy-0','beefy-1'],
         'bs'   : ['beefy-1','wimpy-1'],
+        'bbs'  : ['wimpy-1'],
         'bss'  : ['beefy-1'],
         'fair' : ['beefy-0','beefy-1','wimpy-0','wimpy-1']
     });
-
-    if not os.environ.get('PARSEC_APPS_PATH'):
-        print 'ERROR: env variable PARSEC_APPS_PATH not defined. Please define it to point to the parsec pkgs/apps dir.'
-        sys.exit(1)
 
     sched_tasks = []    
     for task in unsched_tasks:
@@ -162,9 +201,24 @@ def gen_task_to_core_schedule(unsched_tasks, scheduler):
             print '\n'.join(sorted(g_task_db.keys()))
             sys.exit(1)
         if (task.priority == 'hp'):
-            sched_tasks.append(sched_task_t(g_task_db[task.name], hp_core_db[scheduler]))
+            cores=hp_core_db[scheduler]
         else:
-            sched_tasks.append(sched_task_t(g_task_db[task.name], lp_core_db[scheduler]))
+            cores=lp_core_db[scheduler]
+        sched_tasks.append(sched_task_t(cmd=g_task_db[task.name], auto_mask=1, cores=cores, props=''))
+    return sched_tasks
+
+#-----------------------------------------------------
+# Generate a parameters for zsim to compute core affinities
+# Only for the "auto" scheduler
+
+def gen_auto_task_to_core_schedule(unsched_tasks):
+    sched_tasks = []    
+    for task in unsched_tasks:
+        if task.name not in g_task_db:
+            print 'ERROR: Could not find a command for task ' + task.name + '. Supported tasks:'
+            print '\n'.join(sorted(g_task_db.keys()))
+            sys.exit(1)
+        sched_tasks.append(sched_task_t(cmd=g_task_db[task.name], auto_mask=0, cores=[0], props=g_props_db[task.name]))
     return sched_tasks
 
 #-----------------------------------------------------
@@ -187,6 +241,7 @@ def parse_zsim_out(zout_path):
 
 #-----------------------------------------------------
 # Write CSV log file
+
 def write_log(log_path, scheduler, hp_tasks, lp_tasks):
     header = (['scheduler','hp_tasks','lp_tasks'] +
               map(lambda x:x[0] if isinstance(x,tuple) else x, g_props_to_log))
@@ -208,7 +263,6 @@ def write_log(log_path, scheduler, hp_tasks, lp_tasks):
         logline += ',' + str(value)
     log_hdl.write(logline + '\n')
     log_hdl.close()
-
 
 #-----------------------------------------------------
 # Main
@@ -234,8 +288,15 @@ def main():
         print 'ERROR: No tasks to simulate. Specify the hp_tasks or lp_tasks option.'
         sys.exit()
 
+    if not os.environ.get('PARSEC_APPS_PATH'):
+        print 'ERROR: env variable PARSEC_APPS_PATH not defined. Please define it to point to the parsec pkgs/apps dir.'
+        sys.exit(1)
+
     # Generate a task-to-core mapping
-    sched_tasks = gen_task_to_core_schedule(unsched_tasks, args.scheduler)
+    if args.scheduler == 'auto':
+        sched_tasks = gen_auto_task_to_core_schedule(unsched_tasks)
+    else:
+        sched_tasks = gen_manual_task_to_core_schedule(unsched_tasks, args.scheduler)
 
     # Generate zsim cfg file
     if (cmd in ['generate', 'run']):
