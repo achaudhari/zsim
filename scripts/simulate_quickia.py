@@ -118,7 +118,7 @@ g_props_to_log = ([
 
 #-----------------------------------------------------
 # Command line option parser
-g_schedulers = ['auto','1b','1s','bb','ss','bs','bss','fair'];
+g_schedulers = ['auto','1b','1s','bb','ss','bs','bss','bbs','fair'];
 
 #-----------------------------------------------------
 # Core mapping
