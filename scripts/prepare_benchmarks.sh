@@ -35,11 +35,11 @@ rm -rf bin-sm/
 rm -rf bin-md/
 rm -rf bin-lg/
 cp -rf bin/ bin-sm/
-echo "cd $PARSEC_APPS_PATH/facesim/inst/amd64-linux.gcc/bin-sm; ./facesim -threads 4" > bin-sm/run_facesim.sh
+echo "cwd=\`pwd\`;cd /home/ashish/src/parsec-3.0/pkgs/apps/facesim/inst/amd64-linux.gcc/bin-sm; ./facesim -threads 4; cp -f zsim* \$cwd" > bin-sm/run_facesim.sh
 cp -rf bin/ bin-md/
-echo "cd $PARSEC_APPS_PATH/facesim/inst/amd64-linux.gcc/bin-md; ./facesim -threads 4" > bin-md/run_facesim.sh
+echo "cwd=\`pwd\`;cd /home/ashish/src/parsec-3.0/pkgs/apps/facesim/inst/amd64-linux.gcc/bin-md; ./facesim -threads 4; cp -f zsim* \$cwd" > bin-md/run_facesim.sh
 cp -rf bin/ bin-lg/
-echo "cd $PARSEC_APPS_PATH/facesim/inst/amd64-linux.gcc/bin-lg; ./facesim -threads 4" > bin-lg/run_facesim.sh
+echo "cwd=\`pwd\`;cd /home/ashish/src/parsec-3.0/pkgs/apps/facesim/inst/amd64-linux.gcc/bin-lg; ./facesim -threads 4; cp -f zsim* \$cwd" > bin-lg/run_facesim.sh
 popd_silent
 pushd_silent $PARSEC_APPS_PATH/facesim/inputs
 tar xf input_simsmall.tar -C $PARSEC_APPS_PATH/facesim/inst/amd64-linux.gcc/bin-sm
