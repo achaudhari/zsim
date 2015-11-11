@@ -9,6 +9,12 @@ public:
 static g_vector<bool> computeAffinity(
     uint32_t numCores, uint32_t parallelism, uint32_t workload, uint32_t sharing);
 
+private:
+static float _compute_core_size(
+    float parallelism, float workload, float sharing);
+static float _compute_diversity(
+    float parallelism, float workload, float sharing);
+
 };
 
 #endif  // TASK2CORE_H_
