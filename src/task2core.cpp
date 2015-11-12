@@ -10,6 +10,8 @@ enum core_prio_t { BEEFY, WIMPY };
 g_vector<bool> Task2CoreScheduler::computeAffinity(
     uint32_t numCores, uint32_t parallelism, uint32_t workload, uint32_t sharing
 ) {
+    static const size_t MAX_CORES_PER_TASK = 4;
+
     //Map process properties to a 0.0 - 1.0 scale
     float parrelism_f = static_cast<float>(parallelism) / 100.0;
     float workload_f = static_cast<float>(workload) / 100.0;
@@ -17,22 +19,22 @@ g_vector<bool> Task2CoreScheduler::computeAffinity(
 
     //Map to intermediate parameters
     float core_size = _compute_core_size(parrelism_f, workload_f, sharing_f);
-    float diversity = _compute_diversity(parrelism_f, workload_f, sharing_f);
+    float allowance = _compute_allowance(parrelism_f, workload_f, sharing_f);
 
     //Define queues of core for the scheduler to choose from
     //The scheduler will pick from these queues until the size and
-    //diversity criteria are met
+    //allowance criteria are met
     std::queue<size_t> beefy_cores; beefy_cores.push(0); beefy_cores.push(1);
     std::queue<size_t> wimpy_cores; wimpy_cores.push(2); wimpy_cores.push(3);
 
     //The size priority determines which core we choose from first
     core_prio_t prio = (core_size > 0.5) ? BEEFY : WIMPY;
     //The number of cores determines when to stop choosing cores
-    size_t cores = static_cast<size_t>(ceil(diversity * numCores));
+    size_t num_cores = static_cast<size_t>(ceil(allowance * MAX_CORES_PER_TASK));
 
     //Core allocator
     std::vector<size_t> scheduled_cores;
-    for (size_t i = 0; i < cores; i++) {
+    for (size_t i = 0; i < num_cores; i++) {
         std::queue<size_t>& preferred_queue = (prio==BEEFY) ? beefy_cores : wimpy_cores;
         std::queue<size_t>& other_queue     = (prio==BEEFY) ? wimpy_cores : beefy_cores;
         if (!preferred_queue.empty()) {
@@ -65,7 +67,7 @@ float Task2CoreScheduler::_compute_core_size(float parallelism, float workload, 
             (SHARING_CONTRIBUTION * (1.0 - sharing));
 }
 
-float Task2CoreScheduler::_compute_diversity(float parallelism, float workload, float sharing)
+float Task2CoreScheduler::_compute_allowance(float parallelism, float workload, float sharing)
 {
     static const float PARALLELISM_CONTRIBUTION = 0.50;
     static const float WORKLOAD_CONTRIBUTION    = 0.00;

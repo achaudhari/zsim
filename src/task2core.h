@@ -12,7 +12,7 @@ static g_vector<bool> computeAffinity(
 private:
 static float _compute_core_size(
     float parallelism, float workload, float sharing);
-static float _compute_diversity(
+static float _compute_allowance(
     float parallelism, float workload, float sharing);
 
 };
