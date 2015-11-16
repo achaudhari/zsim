@@ -7,13 +7,14 @@
 class Task2CoreScheduler {
 public:
 static g_vector<bool> computeAffinity(
-    uint32_t numCores, uint32_t parallelism, uint32_t workload, uint32_t sharing);
-
+    uint32_t numCores, uint32_t energy, uint32_t phase,
+    uint32_t l1misses, uint32_t l2misses, uint32_t sharing
+);
 private:
 static float _compute_core_size(
-    float parallelism, float workload, float sharing);
+    float energy, float phase, float l1misses_f, float l2misses_f, float sharing);
 static float _compute_allowance(
-    float parallelism, float workload, float sharing);
+    float energy, float phase, float l1misses_f, float l2misses_f, float sharing);
 
 };
 

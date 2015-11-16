@@ -10,7 +10,7 @@ unsched_task_t = collections.namedtuple('unsched_task_t', 'name priority')
 # A scheduled task
 sched_task_t = collections.namedtuple('sched_task_t', 'cmd auto_mask cores props')
 # Process properties
-proc_props_t = collections.namedtuple('proc_props_t', 'parallelism workload sharing')
+proc_props_t = collections.namedtuple('proc_props_t', 'energy phase l1misses l2misses sharing')
 
 #-----------------------------------------------------
 # Task ID to command mapping code
@@ -45,31 +45,31 @@ g_task_db = ({
 #-----------------------------------------------------
 # Task ID to command mapping code
 g_props_db = ({
-    'blackscholes-sm':  proc_props_t(parallelism=0,workload=0,sharing=0),
-    'blackscholes-md':  proc_props_t(parallelism=0,workload=0,sharing=0),
-    'blackscholes-lg':  proc_props_t(parallelism=0,workload=0,sharing=0),
-    'fluidanimate-sm':  proc_props_t(parallelism=0,workload=0,sharing=0),
-    'fluidanimate-md':  proc_props_t(parallelism=0,workload=0,sharing=0),
-    'fluidanimate-lg':  proc_props_t(parallelism=0,workload=0,sharing=0),
-    'facesim-sm':       proc_props_t(parallelism=0,workload=0,sharing=0),
-    'facesim-md':       proc_props_t(parallelism=0,workload=0,sharing=0),
-    'facesim-lg':       proc_props_t(parallelism=0,workload=0,sharing=0),
-    'swaptions-sm':     proc_props_t(parallelism=0,workload=0,sharing=0),
-    'swaptions-md':     proc_props_t(parallelism=0,workload=0,sharing=0),
-    'swaptions-lg':     proc_props_t(parallelism=0,workload=0,sharing=0),
-    'x264-sm':          proc_props_t(parallelism=0,workload=0,sharing=0),
-    'x264-md':          proc_props_t(parallelism=0,workload=0,sharing=0),
-    'x264-lg':          proc_props_t(parallelism=0,workload=0,sharing=0),
-    'raytrace':         proc_props_t(parallelism=0,workload=0,sharing=0),
-    'vips-sm':          proc_props_t(parallelism=0,workload=0,sharing=0),
-    'vips-md':          proc_props_t(parallelism=0,workload=0,sharing=0),
-    'vips-lg':          proc_props_t(parallelism=0,workload=0,sharing=0),
-    'bodytrack-sm':     proc_props_t(parallelism=0,workload=0,sharing=0),
-    'bodytrack-md':     proc_props_t(parallelism=0,workload=0,sharing=0),
-    'bodytrack-lg':     proc_props_t(parallelism=0,workload=0,sharing=0),
-    'freqmine-sm':      proc_props_t(parallelism=0,workload=0,sharing=0),
-    'freqmine-md':      proc_props_t(parallelism=0,workload=0,sharing=0),
-    'freqmine-lg':      proc_props_t(parallelism=0,workload=0,sharing=0),
+    'blackscholes-sm':  proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'blackscholes-md':  proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'blackscholes-lg':  proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'fluidanimate-sm':  proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'fluidanimate-md':  proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'fluidanimate-lg':  proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'facesim-sm':       proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'facesim-md':       proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'facesim-lg':       proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'swaptions-sm':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'swaptions-md':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'swaptions-lg':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'x264-sm':          proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'x264-md':          proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'x264-lg':          proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'raytrace':         proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'vips-sm':          proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'vips-md':          proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'vips-lg':          proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'bodytrack-sm':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'bodytrack-md':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'bodytrack-lg':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'freqmine-sm':      proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'freqmine-md':      proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'freqmine-lg':      proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
 });
 
 #-----------------------------------------------------
@@ -160,8 +160,10 @@ def generate_zsim_cfg(tmpl_path, cfg_path, tasks):
         else:
             task_entry = (task_name + ' = {\n' +
                           '    command = "' + task.cmd + '";\n' +
-                          '    parallelism = ' + str(task.props.parallelism) + ';\n' +
-                          '    workload = ' + str(task.props.workload) + ';\n' +
+                          '    energy = ' + str(task.props.energy) + ';\n' +
+                          '    phase = ' + str(task.props.phase) + ';\n' +
+                          '    l1misses = ' + str(task.props.l1misses) + ';\n' +
+                          '    l2misses = ' + str(task.props.l2misses) + ';\n' +
                           '    sharing = ' + str(task.props.sharing) + ';\n' +
                           '};\n')
         cfg_file.write(task_entry)

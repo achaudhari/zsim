@@ -8,18 +8,21 @@
 enum core_prio_t { BEEFY, WIMPY };
 
 g_vector<bool> Task2CoreScheduler::computeAffinity(
-    uint32_t numCores, uint32_t parallelism, uint32_t workload, uint32_t sharing
+    uint32_t total_num_cores, uint32_t energy, uint32_t phase,
+    uint32_t l1misses, uint32_t l2misses, uint32_t sharing
 ) {
     static const size_t MAX_CORES_PER_TASK = 4;
 
     //Map process properties to a 0.0 - 1.0 scale
-    float parrelism_f = static_cast<float>(parallelism) / 100.0;
-    float workload_f = static_cast<float>(workload) / 100.0;
+    float energy_f = static_cast<float>(energy) / 100.0;
+    float phase_f = static_cast<float>(phase) / 100.0;
+    float l1misses_f = static_cast<float>(l1misses) / 100.0;
+    float l2misses_f = static_cast<float>(l2misses) / 100.0;
     float sharing_f = static_cast<float>(sharing) / 100.0;
 
     //Map to intermediate parameters
-    float core_size = _compute_core_size(parrelism_f, workload_f, sharing_f);
-    float allowance = _compute_allowance(parrelism_f, workload_f, sharing_f);
+    float core_size = _compute_core_size(energy_f, phase_f, l1misses_f, l2misses_f, sharing_f);
+    float allowance = _compute_allowance(energy_f, phase_f, l1misses_f, l2misses_f, sharing_f);
 
     //Define queues of core for the scheduler to choose from
     //The scheduler will pick from these queues until the size and
@@ -49,31 +52,23 @@ g_vector<bool> Task2CoreScheduler::computeAffinity(
     }
 
     //Translate core allocation to mask
-    g_vector<bool> mask(numCores, false);
+    g_vector<bool> mask(total_num_cores, false);
     for (size_t i = 0; i < scheduled_cores.size(); i++) {
         mask[scheduled_cores[i]] = true;
     }
     return mask;
 }
 
-float Task2CoreScheduler::_compute_core_size(float parallelism, float workload, float sharing)
+float Task2CoreScheduler::_compute_core_size(
+    float energy, float phase, float l1misses_f, float l2misses_f, float sharing)
 {
-    static const float PARALLELISM_CONTRIBUTION = 0.25;
-    static const float WORKLOAD_CONTRIBUTION    = 0.50;
-    static const float SHARING_CONTRIBUTION     = 0.25;
-
-    return  (PARALLELISM_CONTRIBUTION * (1.0 - parallelism)) +
-            (WORKLOAD_CONTRIBUTION * workload) +
-            (SHARING_CONTRIBUTION * (1.0 - sharing));
+    //TODO: Implement scheduler
+    return 1.0;
 }
 
-float Task2CoreScheduler::_compute_allowance(float parallelism, float workload, float sharing)
+float Task2CoreScheduler::_compute_allowance(
+    float energy, float phase, float l1misses_f, float l2misses_f, float sharing)
 {
-    static const float PARALLELISM_CONTRIBUTION = 0.50;
-    static const float WORKLOAD_CONTRIBUTION    = 0.00;
-    static const float SHARING_CONTRIBUTION     = 0.50;
-
-    return  (PARALLELISM_CONTRIBUTION * parallelism) +
-            (WORKLOAD_CONTRIBUTION * workload) +
-            (SHARING_CONTRIBUTION * sharing);
+    //TODO: Implement scheduler
+    return 1.0;
 }
