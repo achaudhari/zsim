@@ -132,6 +132,7 @@ def get_options():
     parser.add_argument('--hp_tasks', type=str, default=None, help='High priority tasks to run.')
     parser.add_argument('--lp_tasks', type=str, default=None, help='Ligh priority tasks to run.')
     parser.add_argument('--scheduler', type=str, default='fair', choices=g_schedulers, help='Scheduling algorithm')
+    parser.add_argument('--instr_window', type=str, default=None, help='Instruction window as a range: "<start>-<stop>"')
     parser.add_argument('--template', type=str, default='quickia.cfg.tmpl', help='zsim config template')
     parser.add_argument('--out_cfg', type=str, default='quickia.cfg', help='Output zsim config file')
     parser.add_argument('--log', type=str, default=None, help='Output log file')
@@ -146,26 +147,40 @@ def print_usage_help():
 # cfg_path: Path to output cfg file
 # tasks: List of sched_task_t. Contains commands and core affinities 
 
-def generate_zsim_cfg(tmpl_path, cfg_path, tasks):
+def generate_zsim_cfg(tmpl_path, instr_window, cfg_path, tasks):
     cfg_file = open(cfg_path, 'w')
     cfg_file.write(open(tmpl_path, 'r').read());
+    if instr_window:
+        instrs = instr_window.split('-')
+        if len(instrs) != 2:
+            print 'ERROR: ' + instr_window + ' is not a valid instruction window.'
+            sys.exit(1)
+    # Write sim info
+    cfg_file.write('sim = {\n')
+    cfg_file.write('    phaseLength = 10000;\n')
+    if instr_window:
+        cfg_file.write('    maxTotalInstrs = ' + instrs[1] + 'L;\n')
+    cfg_file.write('};\n\n')
+    # Write process info
     taskid = 0
     for task in tasks:
         task_name = 'process' + str(taskid)
+        task_entry = task_name + ' = {\n'
         if task.auto_mask == 1:
-            task_entry = (task_name + ' = {\n' +
+            task_entry = (task_entry +
                           '    command = "' + task.cmd + '";\n' +
-                          '    mask = "' + ' '.join(g_core_map[c] for c in task.cores) + '";\n' +
-                          '};\n')
+                          '    mask = "' + ' '.join(g_core_map[c] for c in task.cores) + '";\n')
         else:
-            task_entry = (task_name + ' = {\n' +
+            task_entry = (task_entry +
                           '    command = "' + task.cmd + '";\n' +
                           '    energy = ' + str(task.props.energy) + ';\n' +
                           '    phase = ' + str(task.props.phase) + ';\n' +
                           '    l1misses = ' + str(task.props.l1misses) + ';\n' +
                           '    l2misses = ' + str(task.props.l2misses) + ';\n' +
-                          '    sharing = ' + str(task.props.sharing) + ';\n' +
-                          '};\n')
+                          '    sharing = ' + str(task.props.sharing) + ';\n')
+        if instr_window:
+            task_entry = task_entry + '    dumpInstrs = ' + instrs[0] + 'L;\n'
+        task_entry = task_entry + '};\n'
         cfg_file.write(task_entry)
         taskid = taskid + 1
     cfg_file.close()
@@ -229,25 +244,36 @@ def gen_auto_task_to_core_schedule(unsched_tasks):
 is_tab = ' '.__eq__
 def parse_zsim_out(zout_path):
     lines = iter(open(zout_path, 'r').readlines())
-    zout_dict = dict()
+    zout_dicts = []
+    dict_i = -1
     stack = []
     for line in lines:
         line = line.partition('#')[0].rstrip()
-        path = line.partition(':')[0].rstrip()
-        val = line.partition(':')[2].lstrip()
-        indent = len(list(takewhile(is_tab, path)))
-        stack[indent:] = [path.lstrip()]
-        if (stack[0] == 'root' and val != ''):
-            zout_dict['/'.join(stack[1:])] = int(val)
-    return zout_dict
+        if line == '===':
+            zout_dicts.append(dict())
+            dict_i = dict_i + 1
+            stack = []
+        else:
+            path = line.partition(':')[0].rstrip()
+            val = line.partition(':')[2].lstrip()
+            indent = len(list(takewhile(is_tab, path)))
+            stack[indent:] = [path.lstrip()]
+            if (stack[0] == 'root' and val != ''):
+                zout_dicts[dict_i]['/'.join(stack[1:])] = int(val)
+    del zout_dicts[-1]
+    return zout_dicts
 
 #-----------------------------------------------------
 # Write CSV log file
 
-def write_log(log_path, scheduler, hp_tasks, lp_tasks):
+DEFAULT_STAT_DB = 0
+BASELINE_STAT_DB = 1
+FINAL_STAT_DB = 2
+
+def write_log(log_path, instr_window, scheduler, hp_tasks, lp_tasks):
     header = (['scheduler','hp_tasks','lp_tasks'] +
               map(lambda x:x[0] if isinstance(x,tuple) else x, g_props_to_log))
-    zout_db = parse_zsim_out('zsim.out')
+    zout_db = parse_zsim_out('zsim-ev.out' if instr_window else 'zsim.out')
     log_hdl = None
     if os.path.isfile(log_path):
         log_hdl = open(log_path, 'a')
@@ -258,11 +284,16 @@ def write_log(log_path, scheduler, hp_tasks, lp_tasks):
     logline += ',' + (hp_tasks if hp_tasks is not None else '<None>')
     logline += ',' + (lp_tasks if lp_tasks is not None else '<None>')
     for prop in g_props_to_log:
-        if isinstance(prop, tuple):
-            value = reduce(prop[1], map(lambda x:zout_db[x], prop[2]))
+        value = []
+        for i in range(len(zout_db)):
+            if isinstance(prop, tuple):
+                value.append(reduce(prop[1], map(lambda x:zout_db[i][x], prop[2])))
+            else:
+                value.append(zout_db[i][prop])
+        if len(value) == 1:
+            logline += ',' + str(value[DEFAULT_STAT_DB])
         else:
-            value = zout_db[prop]
-        logline += ',' + str(value)
+            logline += ',' + str(value[FINAL_STAT_DB] - value[BASELINE_STAT_DB])
     log_hdl.write(logline + '\n')
     log_hdl.close()
 
@@ -302,14 +333,14 @@ def main():
 
     # Generate zsim cfg file
     if (cmd in ['generate', 'run']):
-        generate_zsim_cfg(args.template, args.out_cfg, sched_tasks)
+        generate_zsim_cfg(args.template, args.instr_window, args.out_cfg, sched_tasks)
 
     if (cmd in ['run']):
         # Run ZSim
         os.system('../build/opt/zsim ' + args.out_cfg)
-        # Parse zsim output file
+        # Parse zsim output file and write CSV log
         if (args.log is not None):
-            write_log(args.log, args.scheduler, args.hp_tasks, args.lp_tasks)
+            write_log(args.log, args.instr_window, args.scheduler, args.hp_tasks, args.lp_tasks)
 
 
 if __name__ == '__main__':
