@@ -792,9 +792,9 @@ static void PostInitStats(bool perProcessDir, Config& config) {
 
     // Absolute paths for stats files. Note these must be in the global heap.
     const char* pStatsFile = gm_strdup((pathStr + "zsim.h5").c_str());
-    const char* evStatsFile = gm_strdup((pathStr + "zsim-ev.h5").c_str());
     const char* cmpStatsFile = gm_strdup((pathStr + "zsim-cmp.h5").c_str());
     const char* statsFile = gm_strdup((pathStr + "zsim.out").c_str());
+    const char* evStatsFile = gm_strdup((pathStr + "zsim-ev.out").c_str());
 
     if (zinfo->statsPhaseInterval) {
         const char* periodicStatsFilter = config.get<const char*>("sim.periodicStatsFilter", "");
@@ -818,7 +818,7 @@ static void PostInitStats(bool perProcessDir, Config& config) {
         zinfo->periodicStatsBackend = nullptr;
     }
 
-    zinfo->eventualStatsBackend = new HDF5Backend(evStatsFile, zinfo->rootStat, (1 << 17) /* 128KB chunks */, zinfo->skipStatsVectors, false /* don't sum regular aggregates*/);
+    zinfo->eventualStatsBackend = new TextBackend(evStatsFile, zinfo->rootStat);
     zinfo->eventualStatsBackend->dump(true); //must have a first sample
     zinfo->statsBackends->push_back(zinfo->eventualStatsBackend);
 

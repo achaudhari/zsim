@@ -4,5 +4,6 @@ zsim-cmp.h5
 zsim-ev.h5
 zsim.h5
 zsim.out
+zsim-ev.out
 quickia.cfg
 output.v
