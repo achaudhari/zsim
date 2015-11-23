@@ -45,31 +45,31 @@ g_task_db = ({
 #-----------------------------------------------------
 # Task ID to command mapping code
 g_props_db = ({
-    'blackscholes-sm':  proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'blackscholes-md':  proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'blackscholes-lg':  proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'fluidanimate-sm':  proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'fluidanimate-md':  proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'fluidanimate-lg':  proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'facesim-sm':       proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'facesim-md':       proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'facesim-lg':       proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'swaptions-sm':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'swaptions-md':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'swaptions-lg':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'x264-sm':          proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'x264-md':          proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'x264-lg':          proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'blackscholes-sm':  proc_props_t(energy=89,phase=0,l1misses=174260,l2misses=5715,sharing=1000),
+    'blackscholes-md':  proc_props_t(energy=89,phase=0,l1misses=174260,l2misses=5715,sharing=1000),
+    'blackscholes-lg':  proc_props_t(energy=89,phase=0,l1misses=174260,l2misses=5715,sharing=1000),
+    'fluidanimate-sm':  proc_props_t(energy=108,phase=0,l1misses=789020,l2misses=661065,sharing=8),
+    'fluidanimate-md':  proc_props_t(energy=108,phase=0,l1misses=789020,l2misses=661065,sharing=8),
+    'fluidanimate-lg':  proc_props_t(energy=108,phase=0,l1misses=789020,l2misses=661065,sharing=8),
+    'facesim-sm':       proc_props_t(energy=75,phase=0,l1misses=78387,l2misses=78387,sharing=79),
+    'facesim-md':       proc_props_t(energy=75,phase=0,l1misses=78387,l2misses=78387,sharing=79),
+    'facesim-lg':       proc_props_t(energy=75,phase=0,l1misses=78387,l2misses=78387,sharing=79),
+    'swaptions-sm':     proc_props_t(energy=21,phase=0,l1misses=196517,l2misses=19416,sharing=711),
+    'swaptions-md':     proc_props_t(energy=21,phase=0,l1misses=196517,l2misses=19416,sharing=711),
+    'swaptions-lg':     proc_props_t(energy=21,phase=0,l1misses=196517,l2misses=19416,sharing=711),
+    'x264-sm':          proc_props_t(energy=79,phase=0,l1misses=2515517,l2misses=151939,sharing=79),
+    'x264-md':          proc_props_t(energy=79,phase=0,l1misses=2515517,l2misses=151939,sharing=79),
+    'x264-lg':          proc_props_t(energy=79,phase=0,l1misses=2515517,l2misses=151939,sharing=79),
     'raytrace':         proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'vips-sm':          proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'vips-md':          proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'vips-lg':          proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'bodytrack-sm':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'bodytrack-md':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'bodytrack-lg':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'freqmine-sm':      proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'freqmine-md':      proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
-    'freqmine-lg':      proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=0),
+    'vips-sm':          proc_props_t(energy=81,phase=0,l1misses=1300887,l2misses=193887,sharing=61),
+    'vips-md':          proc_props_t(energy=81,phase=0,l1misses=1300887,l2misses=193887,sharing=61),
+    'vips-lg':          proc_props_t(energy=81,phase=0,l1misses=1300887,l2misses=193887,sharing=61),
+    'bodytrack-sm':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=42),
+    'bodytrack-md':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=42),
+    'bodytrack-lg':     proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=42),
+    'freqmine-sm':      proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=21),
+    'freqmine-md':      proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=21),
+    'freqmine-lg':      proc_props_t(energy=0,phase=0,l1misses=0,l2misses=0,sharing=21),
 });
 
 #-----------------------------------------------------
@@ -77,12 +77,24 @@ g_props_db = ({
 #
 # Two formats supported:
 # 1) string: Will lookup the string value as a path in out db
-# 2) tuple of (name, filter_function, list): Will lookup the items for
-#    the values in list and apply an accumulator function to them.
+# 2) tuple of (name, reducer_function, list): Will lookup the items for
+#    the values in list and apply an reducer function to them. A reducer
+#    is a two argument function used as an argument for reduce (from map-reduce)
 #    Example: ('sum_abc', lambda acc,x:acc+x, ['a', 'b', 'c'] will log:
 #             db['a']+db['b']+db['c']
+# 3) tuple of (name, any_function, list): Will lookup the items for
+#    the values in list and apply a arbitrary function to them. The function
+#    must have a single list argument and a single return value.
+#    Example: ('magnitude_abc', lambda x:sqrt((x*x)/len(x)), ['a', 'b', 'c'])
 
-accumulate = lambda acc,x:acc+x
+def accumulate(acc, x):
+    return acc+x
+
+energy_inputs = (['beefy/beefy-0/cycles','beefy/beefy-0/cCycles','beefy/beefy-1/cycles','beefy/beefy-1/cCycles',
+                  'wimpy/wimpy-0/cycles','wimpy/wimpy-0/cCycles','wimpy/wimpy-1/cycles','wimpy/wimpy-1/cCycles'])
+def compute_energy(values):
+    return ((sum(values[0:4])*0.72)+(sum(values[4:8])*0.27))/1000000
+
 g_props_to_log = ([
     'phase',
     ('time', accumulate, ['time/init','time/bound','time/weave']),
@@ -114,6 +126,7 @@ g_props_to_log = ([
     ('l2_beefy-1/misses', accumulate, ['l2_beefy/l2_beefy-1/'+x for x in ['mGETS','mGETXIM','mGETXSM']]),
     ('l2_wimpy-0/misses', accumulate, ['l2_wimpy/l2_wimpy-0/'+x for x in ['mGETS','mGETXIM','mGETXSM']]),
     ('l2_wimpy-1/misses', accumulate, ['l2_wimpy/l2_wimpy-1/'+x for x in ['mGETS','mGETXIM','mGETXSM']]),
+    ('energy', compute_energy, energy_inputs),
 ]);
 
 #-----------------------------------------------------
@@ -287,8 +300,14 @@ def write_log(log_path, instr_window, scheduler, hp_tasks, lp_tasks):
         value = []
         for i in range(len(zout_db)):
             if isinstance(prop, tuple):
-                value.append(reduce(prop[1], map(lambda x:zout_db[i][x], prop[2])))
-            else:
+                if prop[1].func_code.co_argcount == 1:  # Arbitrary function
+                    value.append(prop[1](map(lambda x:zout_db[i][x], prop[2])))
+                elif prop[1].func_code.co_argcount == 2:  # Reducer function
+                    value.append(reduce(prop[1], map(lambda x:zout_db[i][x], prop[2])))
+                else:
+                    print 'ERROR: Invalid propert logging function for ' + prop[0]
+                    sys.exit(1)                    
+            else:  # No function. Just report the value.
                 value.append(zout_db[i][prop])
         if len(value) == 1:
             logline += ',' + str(value[DEFAULT_STAT_DB])

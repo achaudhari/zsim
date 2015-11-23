@@ -5,6 +5,8 @@
 #include "math.h"
 #include "log.h"
 
+static const bool USE_REGRESSION_BASED_SCHEDULER = false;
+
 enum core_prio_t { BEEFY, WIMPY };
 
 g_vector<bool> Task2CoreScheduler::computeAffinity(
@@ -14,11 +16,12 @@ g_vector<bool> Task2CoreScheduler::computeAffinity(
     static const size_t MAX_CORES_PER_TASK = 4;
 
     //Map process properties to a 0.0 - 1.0 scale
-    float energy_f = static_cast<float>(energy) / 100.0;
-    float phase_f = static_cast<float>(phase) / 100.0;
-    float l1misses_f = static_cast<float>(l1misses) / 100.0;
-    float l2misses_f = static_cast<float>(l2misses) / 100.0;
-    float sharing_f = static_cast<float>(sharing) / 100.0;
+    //Normalize to max values
+    float energy_f = static_cast<float>(energy) / 108.0;
+    float phase_f = static_cast<float>(phase) / 1.0;
+    float l1misses_f = static_cast<float>(l1misses) / 2515517.0;
+    float l2misses_f = static_cast<float>(l2misses) / 661065.0;
+    float sharing_f = static_cast<float>(sharing) / 1007.0;
 
     //Map to intermediate parameters
     float core_size = _compute_core_size(energy_f, phase_f, l1misses_f, l2misses_f, sharing_f);
@@ -62,13 +65,29 @@ g_vector<bool> Task2CoreScheduler::computeAffinity(
 float Task2CoreScheduler::_compute_core_size(
     float energy, float phase, float l1misses_f, float l2misses_f, float sharing)
 {
-    //TODO: Implement scheduler
-    return 1.0;
+    if (USE_REGRESSION_BASED_SCHEDULER) {
+        //TODO: Implement scheduler
+        return 1.0;
+    } else {
+        return (((1.0 - energy) * 0.5) +
+                (phase * 0.0) +
+                (l1misses_f * 0.2) +
+                (l2misses_f * 0.3) +
+                (sharing * 0.0));
+    }
 }
 
 float Task2CoreScheduler::_compute_allowance(
     float energy, float phase, float l1misses_f, float l2misses_f, float sharing)
 {
-    //TODO: Implement scheduler
-    return 1.0;
+    if (USE_REGRESSION_BASED_SCHEDULER) {
+        //TODO: Implement scheduler
+        return 1.0;
+    } else {
+        return (((1.0 - energy) * 0.4) +
+                (phase * 0.0) +
+                (l1misses_f * 0.2) +
+                (l2misses_f * 0.0) +
+                (sharing * 0.4));
+    }
 }
