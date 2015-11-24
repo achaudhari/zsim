@@ -18,7 +18,7 @@ g_vector<bool> Task2CoreScheduler::computeAffinity(
     //Map process properties to a 0.0 - 1.0 scale
     //Normalize to max values
     float energy_f = static_cast<float>(energy) / 108.0;
-    float phase_f = static_cast<float>(phase) / 1.0;
+    float phase_f = static_cast<float>(phase) / 12784.0;
     float l1misses_f = static_cast<float>(l1misses) / 2515517.0;
     float l2misses_f = static_cast<float>(l2misses) / 661065.0;
     float sharing_f = static_cast<float>(sharing) / 1007.0;
@@ -69,8 +69,8 @@ float Task2CoreScheduler::_compute_core_size(
         //TODO: Implement scheduler
         return 1.0;
     } else {
-        return (((1.0 - energy) * 0.5) +
-                (phase * 0.0) +
+        return (((1.0 - energy) * 0.4) +
+                (phase * 0.1) +
                 (l1misses_f * 0.2) +
                 (l2misses_f * 0.3) +
                 (sharing * 0.0));
@@ -84,8 +84,8 @@ float Task2CoreScheduler::_compute_allowance(
         //TODO: Implement scheduler
         return 1.0;
     } else {
-        return (((1.0 - energy) * 0.4) +
-                (phase * 0.0) +
+        return (((1.0 - energy) * 0.3) +
+                (phase * 0.1) +
                 (l1misses_f * 0.2) +
                 (l2misses_f * 0.0) +
                 (sharing * 0.4));
