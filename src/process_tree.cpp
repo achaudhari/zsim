@@ -198,9 +198,8 @@ static void PopulateLevel(Config& config, const std::string& prefix, std::vector
                 uint32_t l1misses = config.get<uint32_t>(p_ss.str() + ".l1misses", 1);
                 uint32_t l2misses = config.get<uint32_t>(p_ss.str() + ".l2misses", 1);
                 uint32_t sharing = config.get<uint32_t>(p_ss.str() + ".sharing", 1);
+                dbg("process%d: Using affinity computed by scheduler.", idx);
                 mask = Task2CoreScheduler::computeAffinity(zinfo->numCores, energy, phase, l1misses, l2misses, sharing);
-                dbg("process%d: Using computed affinity using (energy=%d,phase=%d,l1misses=%d,l2misses=%d,sharing=%d)",
-                    idx, energy, phase, l1misses, l2misses, sharing);
             } else {
                 dbg("process%d: Using default affinity.", idx);
             }

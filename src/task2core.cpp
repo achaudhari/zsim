@@ -7,7 +7,8 @@
 
 static const bool USE_REGRESSION_BASED_SCHEDULER = false;
 
-enum core_prio_t { BEEFY, WIMPY };
+size_t Task2CoreScheduler::_beefy_core_idx = 0;
+size_t Task2CoreScheduler::_wimpy_core_idx = 0;
 
 g_vector<bool> Task2CoreScheduler::computeAffinity(
     uint32_t total_num_cores, uint32_t energy, uint32_t phase,
@@ -23,34 +24,32 @@ g_vector<bool> Task2CoreScheduler::computeAffinity(
     float l2misses_f = static_cast<float>(l2misses) / 661065.0;
     float sharing_f = static_cast<float>(sharing) / 1007.0;
 
+    dbg("          * Params = {energy:%f, phase:%f, l1misses:%f, l2misses:%f, sharing:%f}",
+        energy_f, phase_f, l1misses_f, l2misses_f, sharing_f);
+
     //Map to intermediate parameters
     float core_size = _compute_core_size(energy_f, phase_f, l1misses_f, l2misses_f, sharing_f);
     float allowance = _compute_allowance(energy_f, phase_f, l1misses_f, l2misses_f, sharing_f);
 
-    //Define queues of core for the scheduler to choose from
-    //The scheduler will pick from these queues until the size and
-    //allowance criteria are met
-    std::queue<size_t> beefy_cores; beefy_cores.push(0); beefy_cores.push(1);
-    std::queue<size_t> wimpy_cores; wimpy_cores.push(2); wimpy_cores.push(3);
-
     //The size priority determines which core we choose from first
-    core_prio_t prio = (core_size > 0.5) ? BEEFY : WIMPY;
+    core_prio_t pref_core = (core_size > 0.5) ? BEEFY : WIMPY;
+    core_prio_t alt_core = (core_size > 0.5) ? WIMPY : BEEFY;
     //The number of cores determines when to stop choosing cores
     size_t num_cores = static_cast<size_t>(ceil(allowance * MAX_CORES_PER_TASK));
+    size_t pref_cores_left = 2;
+
+    dbg("          * Intermediates = {core_size:%s, allowance:%d}",
+        (pref_core==BEEFY?"BEEFY":"WIMPY"), int(num_cores));
 
     //Core allocator
+    //First choose from preferred pool then dip into the alternate pool
     std::vector<size_t> scheduled_cores;
     for (size_t i = 0; i < num_cores; i++) {
-        std::queue<size_t>& preferred_queue = (prio==BEEFY) ? beefy_cores : wimpy_cores;
-        std::queue<size_t>& other_queue     = (prio==BEEFY) ? wimpy_cores : beefy_cores;
-        if (!preferred_queue.empty()) {
-            scheduled_cores.push_back(preferred_queue.front());
-            preferred_queue.pop();
-        } else if (!other_queue.empty()) {
-            scheduled_cores.push_back(other_queue.front());
-            other_queue.pop();
+        if (pref_cores_left > 0) {
+            scheduled_cores.push_back(_get_next_core(pref_core));
+            pref_cores_left--;
         } else {
-            //No-op. No cores left to schedule.
+            scheduled_cores.push_back(_get_next_core(alt_core));
         }
     }
 
@@ -62,6 +61,21 @@ g_vector<bool> Task2CoreScheduler::computeAffinity(
     return mask;
 }
 
+size_t Task2CoreScheduler::_get_next_core(core_prio_t prio) {
+    static const size_t BEEFY_CORES[2] = {0, 1};
+    static const size_t WIMPY_CORES[2] = {2, 3};
+
+    size_t core = 0;
+    if (prio == BEEFY) {
+        core = BEEFY_CORES[_beefy_core_idx];
+        _beefy_core_idx = (_beefy_core_idx + 1) % 2;
+    } else {
+        core = WIMPY_CORES[_wimpy_core_idx];
+        _wimpy_core_idx = (_wimpy_core_idx + 1) % 2;
+    }
+    return core;
+}
+
 float Task2CoreScheduler::_compute_core_size(
     float energy, float phase, float l1misses_f, float l2misses_f, float sharing)
 {
@@ -69,8 +83,8 @@ float Task2CoreScheduler::_compute_core_size(
         //TODO: Implement scheduler
         return 1.0;
     } else {
-        return (((1.0 - energy) * 0.4) +
-                (phase * 0.1) +
+        return (((1.0 - energy) * 0.1) +
+                (phase * 0.4) +
                 (l1misses_f * 0.2) +
                 (l2misses_f * 0.3) +
                 (sharing * 0.0));
@@ -84,10 +98,10 @@ float Task2CoreScheduler::_compute_allowance(
         //TODO: Implement scheduler
         return 1.0;
     } else {
-        return (((1.0 - energy) * 0.3) +
-                (phase * 0.1) +
-                (l1misses_f * 0.2) +
+        return (((1.0 - energy) * 0.2) +
+                (phase * 0.2) +
+                (l1misses_f * 0.1) +
                 (l2misses_f * 0.0) +
-                (sharing * 0.4));
+                (sharing * 0.5));
     }
 }
