@@ -294,8 +294,8 @@ def write_log(log_path, instr_window, scheduler, hp_tasks, lp_tasks):
         log_hdl = open(log_path, 'w')
         log_hdl.write(','.join(header) + '\n')
     logline = scheduler
-    logline += ',' + (hp_tasks if hp_tasks is not None else '<None>')
-    logline += ',' + (lp_tasks if lp_tasks is not None else '<None>')
+    logline += ',' + (hp_tasks.replace(',',' & ') if hp_tasks is not None else '<None>')
+    logline += ',' + (lp_tasks.replace(',',' & ') if lp_tasks is not None else '<None>')
     for prop in g_props_to_log:
         value = []
         for i in range(len(zout_db)):

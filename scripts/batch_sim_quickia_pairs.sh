@@ -1,9 +1,18 @@
 #!/bin/bash
 
-declare -a benchmarks=("blackscholes-sm" "fluidanimate-sm" "raytrace" "swaptions-sm" "vips-sm" "x264-sm")
+declare -a benchmarks
 declare -a schedulers=("auto" "fair")
 
-logfile=data_singles_`date +"%Y-%m-%d_%H%M"`.csv
+# Generate all unique pairs of benchmarks from the list
+set -- "blackscholes-sm" "fluidanimate-sm" "raytrace" "swaptions-sm" "vips-sm" "x264-sm"
+for a; do
+    shift
+    for b; do
+        benchmarks=("${benchmarks[@]}" "$a,$b")
+    done
+done
+
+logfile=data_pairs_`date +"%Y-%m-%d_%H%M"`.csv
 rm -f $logfile
 
 for s in "${schedulers[@]}"
