@@ -2,6 +2,13 @@
 
 script_arg1=$1
 
+echo "==============================================================="
+echo "Building ZSim"
+echo "==============================================================="
+pushd ..
+scons -j2
+popd
+
 declare -a benchmarks
 declare -a schedulers=("auto" "fair")
 
@@ -13,7 +20,7 @@ for a; do
         benchmarks=("${benchmarks[@]}" "$a,$b")
     done
 done
-$(git rev-parse --verify HEAD --short)
+
 filename=data_pairs_`date +"%Y-%m-%d_%H%M"`_`git rev-parse --verify HEAD --short`
 rm -f ${filename}.csv
 rm -f ${filename}.log

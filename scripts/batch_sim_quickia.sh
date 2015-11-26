@@ -2,6 +2,13 @@
 
 script_arg1=$1
 
+echo "==============================================================="
+echo "Building ZSim"
+echo "==============================================================="
+pushd ..
+scons -j2
+popd
+
 declare -a benchmarks=("blackscholes-sm" "fluidanimate-sm" "raytrace" "swaptions-sm" "vips-sm" "x264-sm")
 declare -a schedulers=("auto" "fair")
 
