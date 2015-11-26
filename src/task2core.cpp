@@ -83,10 +83,10 @@ float Task2CoreScheduler::_compute_core_size(
         //TODO: Implement scheduler
         return 1.0;
     } else {
-        return (((1.0 - energy) * 0.4) +
-                (phase * 0.1) +
+        return (((1.0 - energy) * 0.3) +
+                (phase * 0.3) +
                 (l1misses_f * 0.2) +
-                (l2misses_f * 0.3) +
+                (l2misses_f * 0.2) +
                 (sharing * 0.0));
     }
 }
@@ -98,8 +98,8 @@ float Task2CoreScheduler::_compute_allowance(
         //TODO: Implement scheduler
         return 1.0;
     } else {
-        return (((1.0 - energy) * 0.4) +
-                (phase * 0.2) +
+        return (((1.0 - energy) * 0.2) +
+                (phase * 0.4) +
                 (l1misses_f * 0.0) +
                 (l2misses_f * 0.0) +
                 (sharing * 0.4));
